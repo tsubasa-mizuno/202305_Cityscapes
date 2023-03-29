@@ -1,0 +1,114 @@
+{
+    // IntelliSense を使用して利用可能な属性を学べます。
+    // 既存の属性の説明をホバーして表示します。
+    // 詳細情報は次を確認してください: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Python: 現在のファイル",
+            "type": "python",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal",
+            "justMyCode": false
+        },
+        {
+            "name": "train.py cuda:0 p=0.2, pp, rs, mv",
+            "type": "python",
+            "request": "launch",
+            "program": "train.py",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "cwd": "${workspaceFolder}/action_recognition",
+            "env": {
+                "CUDA_VISIBLE_DEVICES": "0"
+            },
+            "args": [
+                "-s",
+                "/mnt/SSD4TB/panopticUCFframe",
+                "-t",
+                "/mnt/SSD4TB/UCFframe",
+                "--multiview",
+                "-p",
+                "0.2",
+                "--paste",
+                "--category_sampling",
+                "Random",
+            ]
+        },
+        {
+            "name": "train.py cuda:0 p=1.0, pp, rs, mv",
+            "type": "python",
+            "request": "launch",
+            "program": "train.py",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "cwd": "${workspaceFolder}/action_recognition",
+            "env": {
+                "CUDA_VISIBLE_DEVICES": "0"
+            },
+            "args": [
+                "-s",
+                "/mnt/SSD4TB/panopticUCFframe",
+                "-t",
+                "/mnt/SSD4TB/UCFframe",
+                "--multiview",
+                "-p",
+                "1.0",
+                "--paste",
+                "--category_sampling",
+                "Random",
+            ]
+        },
+        {
+            "name": "train.py cuda:0 p=1.0, pp, rs, mv,gpus 2",
+            "type": "python",
+            "request": "launch",
+            "program": "train.py",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "cwd": "${workspaceFolder}/action_recognition",
+            "env": {
+                "CUDA_VISIBLE_DEVICES": "0,1"
+            },
+            "args": [
+                "-s",
+                "/mnt/SSD4TB/panopticUCFframe",
+                "-t",
+                "/mnt/SSD4TB/UCFframe",
+                "--multiview",
+                "-p",
+                "1.0",
+                "--paste",
+                "--category_sampling",
+                "Random",
+                "--gpus",
+                "2"
+            ]
+        },
+        {
+            "name": "train.py cuda:1 p=0.2, pp, rs, mv",
+            "type": "python",
+            "request": "launch",
+            "program": "train.py",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "cwd": "${fileDirname}",
+            "env": {
+                "CUDA_VISIBLE_DEVICES": "1"
+            },
+            "args": [
+                "-s",
+                "/mnt/SSD4TB/panopticUCFframe",
+                "-t",
+                "/mnt/SSD4TB/UCFframe",
+                "--multiview",
+                "-p",
+                "1.0",
+                "--paste",
+                "--category_sampling",
+                "Random",
+            ]
+        },
+    ]
+}
