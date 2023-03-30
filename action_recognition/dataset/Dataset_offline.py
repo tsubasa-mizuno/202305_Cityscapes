@@ -24,23 +24,25 @@ class AlignedDataset(Dataset):
         self.target_list = []
 
         if purpose == 'train':
+            # "/mnt/HDD10TB-1/mizuno/dataset/cityscapes/datalist/datalist_train.txt"をfに入れる
             f = open(config.train_split, 'r')
         else:
+            # "/mnt/HDD10TB-1/mizuno/dataset/cityscapes/datalist/datalist_test.txt"をfに入れる
             f = open(config.test_split, 'r')
 
         data = f.readlines()
         del data[100:]
 
         for i in range(len(data)):
-            #
-            video_name = data[i].split()[0].replace('.avi', '').rstrip("\n")
+            # ex)aachen/aachen_000000_000019_leftImg8bit
+            image_name = data[i].split()[0].replace('.png', '').rstrip("\n")
             # os.path.join(a, b)->a/b
-            source_video_path = os.path.join(config.source, video_name, 'label_map')
-            instance_map_path = os.path.join(config.source, video_name, 'instance_map')
-            target_video_path = os.path.join(config.target, video_name)
+            train_image_path = os.path.join(config.source, image_name, 'label_map')
+            instance_map_path = os.path.join(config.source, image_name, 'instance_map')
+            target_video_path = os.path.join(config.target, image_name)
 
             # ディレクトリまでのパスのリストを生成
-            self.source_list.append(source_video_path)
+            self.train_list.append(train_image_path)
             self.instance_list.append(instance_map_path)
             self.target_list.append(target_video_path)
 

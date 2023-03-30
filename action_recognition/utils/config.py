@@ -64,12 +64,12 @@ def factory():
     )
     parser.add_argument(
         '--train_split',
-        default='/mnt/SSD4TB/ucfTrainTestlist/trainlist01.txt',
+        default='/mnt/HDD10TB-1/mizuno/dataset/cityscapes/datalist/datalist_train.txt',
         type=str
     )
     parser.add_argument(
         '--test_split',
-        default='/mnt/SSD4TB/ucfTrainTestlist/testlist01.txt',
+        default='/mnt/HDD10TB-1/mizuno/dataset/cityscapes/datalist/datalist_test.txt',
         type=str
     )
     parser.add_argument(
