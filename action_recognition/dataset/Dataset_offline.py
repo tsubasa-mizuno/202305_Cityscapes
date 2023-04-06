@@ -154,7 +154,7 @@ class AlignedDataset(Dataset):
             # ----image----
             image_path = image_file_path_list[i]
             label_numpy = imread(image_path)
-            source = torch.from_numpy(label_numpy).unsqueeze(0)
+            image = torch.from_numpy(label_numpy).unsqueeze(0)
 
             # shape:H*Wが欲しい
             # ----インスタンスマップ----
@@ -222,9 +222,9 @@ class AlignedDataset(Dataset):
 
         data = self.make_dataset(
             index,
-            self.source_file_list,
-            self.instance_file_list,
-            self.target_file_list
+            self.image_file_list,
+            self.labels_file_list,
+            # self.target_file_list
         )
 
         return data
