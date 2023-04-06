@@ -20,6 +20,11 @@ class AlignedDataset(Dataset):
         self.num_intervals = config.num_intervals   # 間隔5
         self.class_idx_dict = self.classToIdx(config)
 
+        # imageファイルのリスト
+        self.image_list = []
+        # labelsファイルのリスト
+        self.labels_list = []
+
         # trainがTrueの時，trainのパスを指定
         if purpose == 'train':
             image_folder = '/mnt/mizuno/dataset/cityscapes/leftImg8bit_trainvaltest/leftImg8bit/train/*/*_leftImg8bit.png'
@@ -41,72 +46,68 @@ class AlignedDataset(Dataset):
         # del data[100:]
 
         # for i in range(len(data)):
-        #     # ex)aachen/aachen_000000_000019_leftImg8bit
-        #     image_name = data[i].split()[0].replace('.png', '').rstrip("\n")
-        #     # os.path.join(a, b)->a/b
-        #     train_image_path = os.path.join(config.source, image_name, 'label_map')
-        #     instance_map_path = os.path.join(config.source, image_name, 'instance_map')
-        #     target_video_path = os.path.join(config.target, image_name)
+        # ex)aachen/aachen_000000_000019_leftImg8bit
+        # image_name = data[i].split()[0].replace('.png', '').rstrip("\n")
+        # os.path.join(a, b)->a/b
+        # train_image_path = os.path.join(config.source, image_name, 'label_map')
+        # instance_map_path = os.path.join(config.source, image_name, 'instance_map')
+        # target_video_path = os.path.join(config.target, image_name)
 
-        #     # ディレクトリまでのパスのリストを生成
-        #     self.train_list.append(train_image_path)
-        #     self.instance_list.append(instance_map_path)
-        #     self.target_list.append(target_video_path)
+        # ディレクトリまでのパスのリストを生成
+        self.image_list.append(image_folder)
+        self.instance_list.append(labels_folder)
+        # self.target_list.append(target_video_path)
 
         # ここを作らないといけない
         # フレームまでのパスが欲しい
         # ラベルマップのついているフレームだけを取り出したい
 
-        self.source_file_list = []
-        self.instance_file_list = []
-        self.target_file_list = []
-        for i in range(len(self.source_list)):
+        self.image_file_list = []
+        self.labels_file_list = []
+        # self.target_file_list = []
+        for i in range(len(self.image_list)):
 
-            # sourcefile
-            for _, _, fnames in sorted(os.walk(self.source_list[i])):
+            # image_file
+            for _, _, fnames in sorted(os.walk(self.image_list[i])):
                 # os.walk(a) -> 現在のディレクトリ，内包するディレクトリ一覧，内包するファイル一覧
                 # _のところは無視
-                source_file_path_list = []
+                image_file_path_list = []
 
                 for fname in fnames:
-                    source_file_path = os.path.join(
-                        self.source_list[i], fname
+                    image_file_path = os.path.join(
+                        self.image_list[i], fname
                     )
-                    source_file_path_list.append(source_file_path)
+                    image_file_path_list.append(image_file_path)
 
-            # instance
-            for _, _, fnames in sorted(os.walk(self.instance_list[i])):
-                instance_file_path_list = []
+            # labels_file
+            for _, _, fnames in sorted(os.walk(self.labels_list[i])):
+                labels_file_path_list = []
 
                 for fname in fnames:
-                    instance_file_path = os.path.join(
-                        self.instance_list[i], fname
+                    labels_file_path = os.path.join(
+                        self.labels_list[i], fname
                     )
-                    instance_file_path_list.append(instance_file_path)
+                    labels_file_path_list.append(labels_file_path)
 
             # targetfile
-            for _, _, fnames in sorted(os.walk(self.target_list[i])):
-                target_file_path_list = []
+            # for _, _, fnames in sorted(os.walk(self.target_list[i])):
+            #     target_file_path_list = []
 
-                for fname in fnames:
-                    target_file_path = os.path.join(
-                        self.target_list[i], fname
-                    )
-                    target_file_path_list.append(target_file_path)
+            #     for fname in fnames:
+            #         target_file_path = os.path.join(
+            #             self.target_list[i], fname
+            #         )
+            #         target_file_path_list.append(target_file_path)
 
             # 16*5=80フレーム以上のファイルのみ，ソートする
-            if len(source_file_path_list) > self.num_frames * self.num_intervals:
-                source_file_path_list.sort()
-                instance_file_path_list.sort()
-                target_file_path_list.sort()
+            if len(image_file_path_list) > self.num_frames * self.num_intervals:
+                image_file_path_list.sort()
+                labels_file_path_list.sort()
+                # target_file_path_list.sort()
 
-                self.source_file_list.append(source_file_path_list)
-                self.instance_file_list.append(instance_file_path_list)
-                self.target_file_list.append(target_file_path_list)
-
-    # データセットの長さを調べる
-    def __len__(self):
-        return len(self.image_file)
+                self.image_file_list.append(image_file_path_list)
+                self.labels_file_list.append(labels_file_path_list)
+                # self.target_file_list.append(target_file_path_list)
 
     # 短い方をsizeの値に合わせるように，アスペクト比を保ったままリサイズする
     def short_side(self, w, h, size):
@@ -119,21 +120,21 @@ class AlignedDataset(Dataset):
             new_w = int(math.floor((float(w) / h) * size))
         return new_w, new_h
 
-    def make_dataset(self, index, source_list, instance_list, target_list) -> dict:
+    def make_dataset(self, index, image_list, labels_list) -> dict:
         # ランダムなindexの画像を取得
-        source_file_path_list = source_list[index]
-        instance_file_path_list = instance_list[index]
-        target_file_path_list = target_list[index]
+        image_file_path_list = image_list[index]
+        labels_file_path_list = labels_list[index]
+        # target_file_path_list = target_list[index]
 
         # 開始場所をランダムで指定する
         rand_index = random.randint(
-            0, len(source_file_path_list) - (self.num_frames * self.num_intervals)
+            0, len(image_file_path_list) - (self.num_frames * self.num_intervals)
         )
 
         dict_key = ''
-        sampling_target = []
-        sampling_source = []
-        sampling_instance = []
+        # sampling_target = []
+        sampling_image = []
+        sampling_labels = []
         path_list = []
 
         seed = random.randint(0, 2**32)
@@ -146,37 +147,37 @@ class AlignedDataset(Dataset):
 
             # shape:H*W*3が欲しい
             # ----UCFframe-----
-            target_numpy = imread(target_file_path_list[i])
-            target = torch.from_numpy(target_numpy).permute(2, 0, 1)
+            # target_numpy = imread(target_file_path_list[i])
+            # target = torch.from_numpy(target_numpy).permute(2, 0, 1)
 
             # shape:H*W欲しい
-            # ----ラベル画像----
-            source_path = source_file_path_list[i]
-            label_numpy = imread(source_path)
+            # ----image----
+            image_path = image_file_path_list[i]
+            label_numpy = imread(image_path)
             source = torch.from_numpy(label_numpy).unsqueeze(0)
 
             # shape:H*Wが欲しい
             # ----インスタンスマップ----
             # まずnumpyにする
-            instance_numpy = imread(instance_file_path_list[i])
+            labels_numpy = imread(labels_file_path_list[i])
             # numpyをテンソルに変換する
-            instance = torch.from_numpy(instance_numpy).unsqueeze(0)
+            labels = torch.from_numpy(labels_numpy).unsqueeze(0)
 
-            sampling_target.append(target)
-            sampling_source.append(source)
-            sampling_instance.append(instance)
+            # sampling_target.append(target)
+            sampling_image.append(image)
+            sampling_labels.append(labels)
 
-        path_list.append(str(Path(source_path).parent.parent.name))
+        path_list.append(str(Path(image_path).parent.parent.name))
 
         # リサイズされた画像の縦と横の長さをリスト化する
         # target.size()[1]：縦の長さ，target.size()[2]：横の長さ
-        h, w = self.short_side(target.size()[1], target.size()[2], 256)
-        transform_list = [
-            transforms.Resize([h, w], Image.NEAREST),
-            transforms.RandomCrop(self.config.crop_size)
-        ]
+        # h, w = self.short_side(target.size()[1], target.size()[2], 256)
+        # transform_list = [
+        #     transforms.Resize([h, w], Image.NEAREST),
+        #     transforms.RandomCrop(self.config.crop_size)
+
         # transform.Compose：複数のTransformを連続して行うTransform
-        transform = transforms.Compose(transform_list)
+        # transform = transforms.Compose(transform_list)
 
         # ここでは16*□*224*224になっているが，3*224*224に変換する
         # target_tensor.size():16*3*224*224
@@ -230,4 +231,4 @@ class AlignedDataset(Dataset):
 
     def __len__(self):
         # 全画像ファイル数を返す
-        return len(self.source_file_list)
+        return len(self.image_file_list)
