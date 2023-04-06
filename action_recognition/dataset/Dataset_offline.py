@@ -5,6 +5,7 @@ from torch.utils.data import Dataset
 import torch
 import random
 import math
+import glob
 from pathlib import Path
 from skimage.io import imread
 
@@ -15,40 +16,47 @@ class AlignedDataset(Dataset):
     def __init__(self, config, purpose) -> None:
         # データセットクラスの初期化
         self.config = config
-        self.num_frames = config.num_frames
-        self.num_intervals = config.num_intervals
+        self.num_frames = config.num_frames  # 16フレーム
+        self.num_intervals = config.num_intervals   # 間隔5
         self.class_idx_dict = self.classToIdx(config)
 
-        self.source_list = []
-        self.instance_list = []
-        self.target_list = []
-
+        # trainがTrueの時，trainのパスを指定
         if purpose == 'train':
-            # "/mnt/HDD10TB-1/mizuno/dataset/cityscapes/datalist/datalist_train.txt"をfに入れる
-            f = open(config.train_split, 'r')
+            image_folder = '/mnt/mizuno/dataset/cityscapes/leftImg8bit_trainvaltest/leftImg8bit/train/*/*_leftImg8bit.png'
+            self.image_files = glob.glob(image_folder)
+            labels_folder = '/mnt/mizuno/dataset/cityscapes/gtFine_trainvaltest/gtFine/train/*/*_gtFine_labelIds.png'
+            self.labels_files = glob.glob(labels_folder)
+        # trainがFalseの時，testのパスを指定
         else:
-            # "/mnt/HDD10TB-1/mizuno/dataset/cityscapes/datalist/datalist_test.txt"をfに入れる
-            f = open(config.test_split, 'r')
+            image_folder = '/mnt/mizuno/dataset/cityscapes/leftImg8bit_trainvaltest/leftImg8bit/test/*/*_leftImg8bit.png'
+            self.image_files = glob.glob(image_folder)
+            labels_folder = '/mnt/mizuno/dataset/cityscapes/gtFine_trainvaltest/gtFine/test/*/*_gtFine_labelIds.png'
+            self.labels_files = glob.glob(labels_folder)
 
-        data = f.readlines()
-        del data[100:]
+        # ソートする
+        self.image_files.sort()
+        self.labels_files.sort()
 
-        for i in range(len(data)):
-            # ex)aachen/aachen_000000_000019_leftImg8bit
-            image_name = data[i].split()[0].replace('.png', '').rstrip("\n")
-            # os.path.join(a, b)->a/b
-            train_image_path = os.path.join(config.source, image_name, 'label_map')
-            instance_map_path = os.path.join(config.source, image_name, 'instance_map')
-            target_video_path = os.path.join(config.target, image_name)
+        # data = f.readlines()
+        # del data[100:]
 
-            # ディレクトリまでのパスのリストを生成
-            self.train_list.append(train_image_path)
-            self.instance_list.append(instance_map_path)
-            self.target_list.append(target_video_path)
+        # for i in range(len(data)):
+        #     # ex)aachen/aachen_000000_000019_leftImg8bit
+        #     image_name = data[i].split()[0].replace('.png', '').rstrip("\n")
+        #     # os.path.join(a, b)->a/b
+        #     train_image_path = os.path.join(config.source, image_name, 'label_map')
+        #     instance_map_path = os.path.join(config.source, image_name, 'instance_map')
+        #     target_video_path = os.path.join(config.target, image_name)
+
+        #     # ディレクトリまでのパスのリストを生成
+        #     self.train_list.append(train_image_path)
+        #     self.instance_list.append(instance_map_path)
+        #     self.target_list.append(target_video_path)
 
         # ここを作らないといけない
         # フレームまでのパスが欲しい
         # ラベルマップのついているフレームだけを取り出したい
+
         self.source_file_list = []
         self.instance_file_list = []
         self.target_file_list = []
@@ -95,6 +103,10 @@ class AlignedDataset(Dataset):
                 self.source_file_list.append(source_file_path_list)
                 self.instance_file_list.append(instance_file_path_list)
                 self.target_file_list.append(target_file_path_list)
+
+    # データセットの長さを調べる
+    def __len__(self):
+        return len(self.image_file)
 
     # 短い方をsizeの値に合わせるように，アスペクト比を保ったままリサイズする
     def short_side(self, w, h, size):
@@ -194,6 +206,7 @@ class AlignedDataset(Dataset):
             'path': path_list
         }
 
+    # クラス名とデータセット内の対応するインデックスを対応づけるメソッド
     def classToIdx(self, args):
         class_list = sorted(
             entry.name for entry in os.scandir(args.source)
