@@ -24,7 +24,7 @@
                 "CUDA_VISIBLE_DEVICES": "0"
             },
             "args": [
-                "-im",
+                "-s",
                 "/mnt/SSD4TB/panopticUCFframe",
                 "-t",
                 "/mnt/SSD4TB/UCFframe",
@@ -72,10 +72,10 @@
                 "CUDA_VISIBLE_DEVICES": "0,1"
             },
             "args": [
-                "-s",
-                "/mnt/SSD4TB/panopticUCFframe",
-                "-t",
-                "/mnt/SSD4TB/UCFframe",
+                "-l",
+                "/mnt/mizuno/dataset/cityscapes/gtFine_trainvaltest/gtFine/*/*/*_gtFine_labelIds.png",
+                "-im",
+                "/mnt/mizuno/dataset/cityscapes/gtFine_trainvaltest/leftImg8bit_trainvaltest/leftImg8bit/*/*/*_leftImg8bit.png",
                 "--multiview",
                 "-p",
                 "1.0",

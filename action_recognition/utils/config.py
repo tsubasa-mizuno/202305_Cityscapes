@@ -1,7 +1,7 @@
 import argparse
 
 
-def factory():
+def get_args():
     parser = argparse.ArgumentParser()
     parser.add_argument(
         '--dataset',
@@ -9,11 +9,18 @@ def factory():
         default='UCF',
         choices=['UCF', 'HMDB', 'Kinetics']
     )
+    # parser.add_argument(
+    #     '-l',
+    #     '--labels',
+    #     type=str,
+    #     help='input image to generator'
+    # )
     parser.add_argument(
         '-l',
         '--labels',
         type=str,
-        help='input image to generator'
+        required=True,
+        help='ground truth'
     )
     parser.add_argument(
         '-im',
@@ -62,56 +69,40 @@ def factory():
         default=1,
         help='how many GPUs to be used for model. default 1'
     )
+
+    # dataset_path
     parser.add_argument(
-        '--train_split',
-        default='/mnt/HDD10TB-1/mizuno/dataset/cityscapes/datalist/datalist_train.txt',
-        type=str
-    )
-    parser.add_argument(
-        '--test_split',
-        default='/mnt/HDD10TB-1/mizuno/dataset/cityscapes/datalist/datalist_test.txt',
-        type=str
-    )
-    parser.add_argument(
-        '--train_labels_folder',
-        default='/mnt/mizuno/dataset/cityscapes/gtFine_trainvaltest/gtFine/train/*/*_gtFine_labelIds.png',
-        type=str
-    )
-    parser.add_argument(
-        '--train_instance_folder',
-        default='/mnt/mizuno/dataset/cityscapes/gtFine_trainvaltest/gtFine/train/*/*_gtFine_instanceIds.png',
+        '--train_gtFine_folder',
+        default='/mnt/mizuno/dataset/cityscapes/gtFine_trainvaltest/gtFine/train/aachen',
         type=str
     )
     parser.add_argument(
         '--train_image_folder',
-        default='/mnt/mizuno/dataset/cityscapes/leftImg8bit_trainvaltest/leftImg8bit/train/*/*_leftImg8bit.png',
+        default='/mnt/mizuno/dataset/cityscapes/leftImg8bit_trainvaltest/leftImg8bit/train',
         type=str
     )
     parser.add_argument(
-        '--test_labels_folder',
-        default='/mnt/mizuno/dataset/cityscapes/gtFine_trainvaltest/gtFine/test/*/*_gtFine_labelIds.png',
-        type=str
-    )
-    parser.add_argument(
-        '--test_instance_folder',
-        default='/mnt/mizuno/dataset/cityscapes/gtFine_trainvaltest/gtFine/test/*/*_gtFine_instanceIds.png',
+        '--test_gtFine_folder',
+        default='/mnt/mizuno/dataset/cityscapes/gtFine_trainvaltest/gtFine/test',
         type=str
     )
     parser.add_argument(
         '--test_image_folder',
-        default='/mnt/mizuno/dataset/cityscapes/leftImg8bit_trainvaltest/leftImg8bit/test/*/*_leftImg8bit.png',
+        default='/mnt/mizuno/dataset/cityscapes/leftImg8bit_trainvaltest/leftImg8bit/test',
         type=str
     )
-    parser.add_argument(
-        '--num_frames',
-        type=int,
-        default=16
-    )
-    parser.add_argument(
-        '--num_intervals',
-        type=int,
-        default=5
-    )
+
+
+    # parser.add_argument(
+    #     '--num_frames',
+    #     type=int,
+    #     default=16
+    # )
+    # parser.add_argument(
+    #     '--num_intervals',
+    #     type=int,
+    #     default=5
+    # )
     parser.add_argument(
         '--lr',
         type=float,
