@@ -24,7 +24,7 @@
                 "CUDA_VISIBLE_DEVICES": "0"
             },
             "args": [
-                "-s",
+                "-im",
                 "/mnt/SSD4TB/panopticUCFframe",
                 "-t",
                 "/mnt/SSD4TB/UCFframe",

@@ -18,48 +18,32 @@ class AlignedDataset(Dataset):
         self.config = config
         self.num_frames = config.num_frames  # 16フレーム
         self.num_intervals = config.num_intervals   # 間隔5
-        self.class_idx_dict = self.classToIdx(config)
 
-        # imageファイルのリスト
-        self.image_list = []
         # labelsファイルのリスト
         self.labels_list = []
+        # instanceファイルのリスト
+        self.instance_list = []
+        # imageファイルのリスト
+        self.image_list = []
 
         # trainがTrueの時，trainのパスを指定
         # 大元のpathをargsで指定
         # 大元以下は結合
         if purpose == 'train':
-            image_folder = '/mnt/mizuno/dataset/cityscapes/leftImg8bit_trainvaltest/leftImg8bit/train/*/*_leftImg8bit.png'
-            self.image_files = glob.glob(image_folder)
-            labels_folder = '/mnt/mizuno/dataset/cityscapes/gtFine_trainvaltest/gtFine/train/*/*_gtFine_labelIds.png'
-            self.labels_files = glob.glob(labels_folder)
+            self.labels_list = glob.glob(config.train_labels_folder)
+            self.instance_list = glob.glob(config.train_instance_forder)
+            self.image_list = glob.glob(config.train_image_forder)
         # trainがFalseの時，testのパスを指定
         else:
-            image_folder = '/mnt/mizuno/dataset/cityscapes/leftImg8bit_trainvaltest/leftImg8bit/test/*/*_leftImg8bit.png'
-            self.image_files = glob.glob(image_folder)
-            labels_folder = '/mnt/mizuno/dataset/cityscapes/gtFine_trainvaltest/gtFine/test/*/*_gtFine_labelIds.png'
-            self.labels_files = glob.glob(labels_folder)
+            self.labels_list = glob.glob(config.test_labels_folder)
+            self.instance_list = glob.glob(config.test_instance_forder)
+            self.image_list = glob.glob(config.test_image_forder)
+
+        print(self.labels_list)
 
         # ソートする
         self.image_files.sort()
         self.labels_files.sort()
-
-        # data = f.readlines()
-        # del data[100:]
-
-        # for i in range(len(data)):
-        # ex)aachen/aachen_000000_000019_leftImg8bit
-        # image_name = data[i].split()[0].replace('.png', '').rstrip("\n")
-        # os.path.join(a, b)->a/b
-
-        # train_image_path = os.path.join(config.source, image_name, 'label_map')
-        # instance_map_path = os.path.join(config.source, image_name, 'instance_map')
-        # target_video_path = os.path.join(config.target, image_name)
-
-        # ディレクトリまでのパスのリストを生成
-        self.image_list.append(image_folder)
-        self.labels_list.append(labels_folder)
-        # self.target_list.append(target_path)
 
         # ここを作らないといけない
         # フレームまでのパスが欲しい
@@ -182,14 +166,14 @@ class AlignedDataset(Dataset):
         }
 
     # クラス名とデータセット内の対応するインデックスを対応づけるメソッド
-    def classToIdx(self, args):
-        class_list = sorted(
-            entry.name for entry in os.scandir(args.image)
-            if entry.is_dir())
+    # def classToIdx(self, args):
+    #     class_list = sorted(
+    #         entry.name for entry in os.scandir(args.image)
+    #         if entry.is_dir())
 
-        class_to_idx = {cls_name: i for i, cls_name in enumerate(class_list)}
+    #     class_to_idx = {cls_name: i for i, cls_name in enumerate(class_list)}
 
-        return class_to_idx
+    #     return class_to_idx
 
     # __getitem__が呼び出された時，index（ランダム引数），source_file_list，instance_file_list，target_file_listをdataにして返す
     def __getitem__(self, index) -> dict:
