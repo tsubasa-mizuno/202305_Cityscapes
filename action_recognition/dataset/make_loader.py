@@ -82,6 +82,10 @@ def make_loader(opt):
         else:
             val_dataset = HMDB_Dataset.AlignedDataset(opt, 'test')
 
+    elif opt.dataset == 'Cityscapes':
+        train_dataset = Dataset_offline.AlignedDataset(opt, 'train')
+        val_dataset = Dataset_offline.AlignedDataset(opt, 'val')
+
     elif opt.dataset == 'UCF':
         if opt.online_mode:
             train_dataset = Dataset_online.AlignedDataset(opt, 'train')

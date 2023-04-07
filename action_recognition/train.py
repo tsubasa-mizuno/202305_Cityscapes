@@ -43,8 +43,6 @@ def to_dict(args):
         'train_batch_size': args.train_num_batchs,
         'val_batch_size': args.val_num_batchs,
         'crop_size': args.crop_size,
-        'frame': args.num_frames,
-        'frame_interval': args.num_intervals,
         'num_workers': args.num_workers,
         'probability': args.probability,
         'person_paste': args.paste,

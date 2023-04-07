@@ -17,40 +17,34 @@ class AlignedDataset(Dataset):
         # データセットクラスの初期化
         self.config = config
 
-        # labelsファイルのリスト
+        # labelsファイルのパスのリスト
         self.labels_list = []
-        # instanceファイルのリスト
+        # instanceファイルのパスのリスト
         self.instance_list = []
-        # imageファイルのリスト
+        # imageファイルのパスのリスト
         self.image_list = []
 
-        # trainがTrueの時，trainのパスを指定
-        # 大元のpathをargsで指定
-        # 大元以下は結合
+        # purpose == trainの時，trainのパスを指定
         if purpose == 'train':
-            self.labels_list = glob.glob(os.path.join(config.tFine_folder, "train/*/*_gtFine_labelIds.png"))
-            print(self.labels_list)
+            self.labels_list = glob.glob(os.path.join(config.gtFine_folder, "train/*/*_gtFine_labelIds.png"))
             self.instance_list = glob.glob(config.gtFine_folder + 'train/*/*_gtFine_instanceIds.png')
             self.image_list = glob.glob(os.path.join(config.image_folder, "train/*/*_leftImg8bit.png"))
-            print(self.labels_list)
-        # trainがFalseの時，testのパスを指定
+        # purpose == valの時，valのパスを指定
+        if purpose == 'val':
+            self.labels_list = glob.glob(os.path.join(config.gtFine_folder, "val/*/*_gtFine_labelIds.png"))
+            self.instance_list = glob.glob(config.gtFine_folder + 'val/*/*_gtFine_instanceIds.png')
+            self.image_list = glob.glob(os.path.join(config.image_folder, "val/*/*_leftImg8bit.png"))
+        # purpose == testの時，testのパスを指定
         else:
             self.labels_list = glob.glob(os.path.join(config.gtFine_folder, 'test/*/*_gtFine_labelIds.png'))
             self.instance_list = glob.glob(os.path.join(config.gtFine_folder, 'test/*/*_gtFine_instanceIds.png'))
             self.image_list = glob.glob(os.path.join(config.image_folder, 'test/*/*_leftImg8bit.png'))
 
-        print(self.labels_list)
-
         # ソートする
-        self.image_files.sort()
-        self.labels_files.sort()
-
-        # ここを作らないといけない
-        # フレームまでのパスが欲しい
-        # ラベルマップのついているフレームだけを取り出したい
-
-        self.image_file_list = []
-        self.labels_file_list = []
+        self.labels_list.sort()
+        self.instance_list.sort()
+        self.image_list.sort()
+        # これでlabels，instance，imageのそれぞれの画像までのパス一覧が順番に並んだリストができた
 
     # 短い方をsizeの値に合わせるように，アスペクト比を保ったままリサイズする
     def short_side(self, w, h, size):
@@ -63,11 +57,12 @@ class AlignedDataset(Dataset):
             new_w = int(math.floor((float(w) / h) * size))
         return new_w, new_h
 
-    def make_dataset(self, index, image_list, labels_list) -> dict:
+    def make_dataset(self, index, labels_list, instance_list, image_list) -> dict:
         # ランダムなindexの画像を取得
+        print(index)
+        labels_file_path = lanels_list[index]
+        instance_file_path = instance_list[index]
         image_file_path = image_list[index]
-        labels_file_path = labels_list[index]
-        # target_file_path = target_list[index]
 
         # 開始場所をランダムで指定する
         rand_index = random.randint(
@@ -180,13 +175,13 @@ class AlignedDataset(Dataset):
 
         data = self.make_dataset(
             index,
-            self.image_file_list,
-            self.labels_file_list,
-            # self.target_file_list
+            self.labels_list,
+            self.instance_file_list,
+            self.image_file_list
         )
 
         return data
 
     def __len__(self):
         # 全画像ファイル数を返す
-        return len(self.image_file_list)
+        return len(self.labels_list)

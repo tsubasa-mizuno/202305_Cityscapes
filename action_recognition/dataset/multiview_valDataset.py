@@ -16,10 +16,7 @@ class AlignedDataset(Dataset):
     def __init__(self, config, mimetics) -> None:
         # データセットクラスの初期化
         self.config = config
-        self.num_frames = config.num_frames
-        self.num_intervals = config.num_intervals
-        self.class_idx_dict = self.classToIdx(config, mimetics)
-        self.target_list = []
+        self.image_list = []
         if mimetics:
             target_video_path = os.path.join(config.mimetics_path, '*', '*')
             self.target_list = sorted(glob.glob(target_video_path))
@@ -42,37 +39,6 @@ class AlignedDataset(Dataset):
                 self.target_list = sorted(glob.glob(target_video_path))
 
         self.target_file_list = []
-        for i in range(len(self.target_list)):
-            for _, _, fnames in sorted(os.walk(self.target_list[i])):
-                target_file_path_list = []
-
-                for fname in fnames:
-                    target_file_path = os.path.join(
-                        self.target_list[i], fname
-                    )
-                    target_file_path_list.append(target_file_path)
-
-            if len(target_file_path_list) > self.num_frames * self.num_intervals:
-                target_file_path_list.sort()
-
-                self.target_file_list.append(target_file_path_list)
-
-    def classToIdx(self, config, mimetics) -> dict:
-        path = config.target
-        if mimetics:
-            path = config.mimetics_path
-        else:
-            if config.dataset == 'HMDB':
-                path = os.path.join(path, 'test')
-            elif config.dataset == 'Kinetics':
-                path = os.path.join(path, 'val')
-        class_list = sorted(
-            entry.name for entry in os.scandir(path)
-            if entry.is_dir())
-
-        class_to_idx = {cls_name: i for i, cls_name in enumerate(class_list)}
-
-        return class_to_idx
 
     def short_side(self, w, h, size):
         # https://github.com/facebookresearch/pytorchvideo/blob/a77729992bcf1e43bf5fa507c8dc4517b3d7bc4c/pytorchvideo/transforms/functional.py#L118

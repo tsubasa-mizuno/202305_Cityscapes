@@ -6,8 +6,8 @@ def get_args():
     parser.add_argument(
         '--dataset',
         type=str,
-        default='UCF',
-        choices=['UCF', 'HMDB', 'Kinetics']
+        default='Cityscapes',
+        choices=['Cityscapes', 'UCF', 'HMDB', 'Kinetics']
     )
     # parser.add_argument(
     #     '-l',
@@ -73,12 +73,12 @@ def get_args():
     # dataset_path
     parser.add_argument(
         '--gtFine_folder',
-        default='/mnt/HDD10TB-1/mizuno/dataset/cityscapes/gtFine_trainvaltest/gtFine/train',
+        default='/mnt/HDD10TB-1/mizuno/dataset/cityscapes/gtFine_trainvaltest/gtFine',
         type=str
     )
     parser.add_argument(
         '--image_folder',
-        default='/mnt/HDD10TB-1/mizuno/dataset/cityscapes/leftImg8bit_trainvaltest/leftImg8bit/train',
+        default='/mnt/HDD10TB-1/mizuno/dataset/cityscapes/leftImg8bit_trainvaltest/leftImg8bit',
         type=str
     )
 
