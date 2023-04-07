@@ -170,50 +170,50 @@ def main_old():
 
                     choice_data = noise(args)
 
-                    target = data['target']
+                    image = data['image']
                     transform = transforms.Normalize(
                         (0.5, 0.5, 0.5),
                         (0.5, 0.5, 0.5)
                     )
-                    target = transform(target / 255)
+                    image = transform(image / 255)
 
                     videos_data = []
                     if choice_data == 'real':
-                        videos = target.permute(0, 2, 1, 3, 4).to(device)
+                        videos = image.permute(0, 2, 1, 3, 4).to(device)
                     else:
                         with torch.no_grad():
                             if args.online_mode:
                                 label_data = []
                                 instance_data = []
-                                for i in range(len(data['target'])):
+                                for i in range(len(data['image'])):
                                     label, instance = segmentation(
                                         args,
-                                        data['target'][i],
+                                        data['image'][i],
                                         seg_model
                                     )
                                     label_data.append(label)
                                     instance_data.append(instance)
-                                data['source'] = torch.stack(label_data, dim=0)
+                                data['label'] = torch.stack(label_data, dim=0)
                                 data['instance'] = torch.stack(instance_data, dim=0)
 
-                            for i in range(len(data['source'])):
-                                video, source, not_paste = label2image(
+                            for i in range(len(data['label'])):
+                                video, label, not_paste = label2image(
                                     # spade.model,
                                     # ここでtorch.Size([16, 16, 3, 224, 224])の5次元テンソルが生成
-                                    convert_label(data['source'][i].clone()),
+                                    convert_label(data['label'][i].clone()),
                                     data['instance'][i],
-                                    target[i],
+                                    image[i],
                                     args,
                                     category_distance
                                 )
 
                                 keep_videos(video.cpu(), 'gen', args, i,)
-                                keep_videos(target[i].cpu(), 'target', args, i)
+                                keep_videos(image[i].cpu(), 'image', args, i)
                                 keep_videos(
-                                    (convert_label(data['source'][i].clone()) - 1).cpu(),
-                                    'source_not_shuffle', args, i, norm=False)
-                                keep_videos(source.cpu(), 'source', args, i, norm=False)
-                                keep_videos((source / 255).cpu(), 'grey', args, i, norm=False)
+                                    (convert_label(data['label'][i].clone()) - 1).cpu(),
+                                    'label_not_shuffle', args, i, norm=False)
+                                keep_videos(label.cpu(), 'label', args, i, norm=False)
+                                keep_videos((label / 255).cpu(), 'grey', args, i, norm=False)
                                 keep_videos(not_paste.cpu(), 'not_paste', args, i)
 
                                 videos_data.append(video.to(device))
@@ -251,22 +251,22 @@ def main_old():
                 smoothing=0,
             ) as pbar_batch:
 
-                # offline_mode and multiview -> data['target'].size() = B*total_multis*T*C*H*W
+                # offline_mode and multiview -> data['image'].size() = B*total_multis*T*C*H*W
                 for batch_num, data in pbar_batch:
                     batches_done = epoch * len(val_loader) + batch_num + 1
 
                     # B*total_multis*16*3*224*224
-                    target = data['target']
+                    image = data['image']
                     transform = transforms.Normalize(
                         (0.5, 0.5, 0.5),
                         (0.5, 0.5, 0.5)
                     )
-                    target = transform(target / 255)
+                    image = transform(image / 255)
 
                     if args.multiview:
-                        videos = target.permute(0, 1, 3, 2, 4, 5).to(device)
+                        videos = image.permute(0, 1, 3, 2, 4, 5).to(device)
                     else:
-                        videos = target.permute(0, 2, 1, 3, 4).to(device)
+                        videos = image.permute(0, 2, 1, 3, 4).to(device)
 
                     X3D.val_action_rec(
                         videos,
@@ -297,22 +297,22 @@ def main_old():
                     smoothing=0,
                 ) as pbar_batch:
 
-                    # offline_mode and multiview -> data['target'].size() = B*total_multis*T*C*H*W
+                    # offline_mode and multiview -> data['image'].size() = B*total_multis*T*C*H*W
                     for batch_num, data in pbar_batch:
                         batches_done = epoch * len(mimetics_loader) + batch_num + 1
 
                         # B*total_multis*16*3*224*224
-                        target = data['target']
+                        image = data['image']
                         transform = transforms.Normalize(
                             (0.5, 0.5, 0.5),
                             (0.5, 0.5, 0.5)
                         )
-                        target = transform(target / 255)
+                        image = transform(image / 255)
 
                         if args.multiview:
-                            videos = target.permute(0, 1, 3, 2, 4, 5).to(device)
+                            videos = image.permute(0, 1, 3, 2, 4, 5).to(device)
                         else:
-                            videos = target.permute(0, 2, 1, 3, 4).to(device)
+                            videos = image.permute(0, 2, 1, 3, 4).to(device)
 
                         X3D.val_action_rec(
                             videos,

@@ -3,6 +3,7 @@ from PIL import Image
 import torchvision.transforms as transforms
 from torch.utils.data import Dataset
 import torch
+import numpy
 import random
 import math
 import glob
@@ -76,35 +77,36 @@ class AlignedDataset(Dataset):
 
         seed = random.randint(0, 2**32)
         # for in range(開始値，最大値，間隔)
-        for i in range(
-            rand_index,
-            rand_index + len(image_file_path) - rand_index,
-            1
-        ):
+        # for i in range(
+        #     rand_index,
+        #     rand_index + len(image_file_path) - rand_index,
+        #     1
+        # ):
 
-            # shape:H*W*3が欲しい
-            # ----実画像-----
-            image_numpy = imread(image_list[i])
-            image = torch.from_numpy(image_numpy).permute(2, 0, 1)
+        # shape:H*W*3が欲しい
+        # ----実画像-----
+        image_numpy = imread(image_list[rand_index])
+        image_tensor = torch.from_numpy(image_numpy).permute(2, 0, 1)
 
-            # shape:H*W欲しい
-            # ----ラベル画像----
-            labels_path = labels_list[i]
-            labels_numpy = imread(labels_path)
-            labels = torch.from_numpy(labels_numpy).unsqueeze(0)
+        # shape:H*W欲しい
+        # ----ラベル画像----
+        labels_numpy = imread(labels_list[rand_index])
+        # [3*1024*2048]
+        labels_tensor = torch.from_numpy(labels_numpy.astype(numpy.float32)).unsqueeze(0)
 
-            # shape:H*Wが欲しい
-            # ----インスタンスマップ----
-            # まずnumpyにする
-            instance_numpy = imread(instance_list[i])
-            # numpyをテンソルに変換する
-            instance = torch.from_numpy(instance_numpy).unsqueeze(0)
+        # shape:H*Wが欲しい
+        # ----インスタンスマップ----
+        # まずnumpyにする
+        instance_numpy = imread(instance_list[rand_index])
+        # numpyをテンソルに変換する
+        instance_tensor = torch.from_numpy(instance_numpy.astype(numpy.float32)).unsqueeze(0)
 
-            sampling_labels.append(labels)
-            sampling_instance.append(instance)
-            sampling_image.append(image)
+        # .append：リストに要素を追加する
+        sampling_labels.append(labels_tensor)
+        sampling_instance.append(instance_tensor)
+        sampling_image.append(image_tensor)
 
-        path_list.append(str(Path(labels_path).parent.parent.name))
+        path_list.append(str(Path(labels_list[rand_index]).parent.parent.name))
 
         # リサイズされた画像の縦と横の長さをリスト化する
         # image.size()[1]：縦の長さ，image.size()[2]：横の長さ
@@ -114,25 +116,27 @@ class AlignedDataset(Dataset):
             transforms.RandomCrop(self.config.crop_size)
         ]
 
-        # transform.Compose：複数のTransformを連続して行うTransform
-        transform = transforms.Compose(transform_list)
+        # # transform.Compose：複数のTransformを連続して行うTransform
+        # transform = transforms.Compose(transform_list)
 
-        # ここでは16*□*224*224になっているが，3*224*224に変換する
-        # image_tensor.size():16*3*224*224
-        # torch.stack：新しいdimを作成し，そそのdimに沿ってテンソルを連結
-        image_tensor = torch.stack(sampling_image, dim=0)
-        torch.manual_seed(seed)
-        image_tensor = transform(image_tensor.float())
+        # # ここでは16*□*224*224になっているが，3*224*224に変換する
+        # # image_tensor.size():16*3*224*224
+        # # torch.stack：新しいdimを作成し，そそのdimに沿ってテンソルを連結
+        # image_tensor = torch.stack(image, dim=0)
+        # torch.manual_seed(seed)
+        # image_tensor = transform(image_tensor.float())
+        # # [80*3*224*224] 2023/04/07/17:40
 
-        # labels_tensor.size():16*1*224*224
-        labels_tensor = torch.stack(sampling_labels, dim=0)
-        torch.manual_seed(seed)
-        labels_tensor = transform(labels_tensor)
+        # # labels_tensor.size():16*1*224*224
+        # labels_tensor = torch.stack(labels, dim=0)
+        # torch.manual_seed(seed)
+        # labels_tensor = transform(labels)
 
-        # instance_tensor.size():16*1*224*224
-        instance_tensor = torch.stack(sampling_instance, dim=0)
-        torch.manual_seed(seed)
-        instance_tensor = transform(instance_tensor)
+
+        # # instance_tensor.size():16*1*224*224
+        # instance_tensor = torch.stack(instance, dim=0)
+        # torch.manual_seed(seed)
+        # instance_tensor = transform(instance_tensor)
 
         return {
             'labels': labels_tensor,
@@ -144,9 +148,9 @@ class AlignedDataset(Dataset):
 
         data = self.make_dataset(
             index,
-            self.source_file_list,
-            self.instance_file_list,
-            self.target_file_list
+            self.labels_list,
+            self.instance_list,
+            self.image_list
         )
 
         return data
