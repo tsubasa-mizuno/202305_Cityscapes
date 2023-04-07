@@ -44,29 +44,14 @@ class AlignedDataset(Dataset):
         self.image_files.sort()
         self.labels_files.sort()
 
-        # data = f.readlines()
-        # del data[100:]
-
-        # for i in range(len(data)):
-        # ex)aachen/aachen_000000_000019_leftImg8bit
-        # image_name = data[i].split()[0].replace('.png', '').rstrip("\n")
-        # os.path.join(a, b)->a/b
-
-        # train_image_path = os.path.join(config.source, image_name, 'label_map')
-        # instance_map_path = os.path.join(config.source, image_name, 'instance_map')
-        # target_video_path = os.path.join(config.target, image_name)
-
         # ディレクトリまでのパスのリストを生成
         self.image_list.append(image_folder)
         self.labels_list.append(labels_folder)
-        # self.target_list.append(target_path)
-
-        # ここを作らないといけない
-        # フレームまでのパスが欲しい
-        # ラベルマップのついているフレームだけを取り出したい
+        self.target_list.append(target_path)
 
         self.image_file_list = []
         self.labels_file_list = []
+        # self.target_file_list = []
 
     # 短い方をsizeの値に合わせるように，アスペクト比を保ったままリサイズする
     def short_side(self, w, h, size):
@@ -100,14 +85,9 @@ class AlignedDataset(Dataset):
         # for in range(開始値，最大値，間隔)
         for i in range(
             rand_index,
-            rand_index + len(image_file_path) - rand_index,
+            len(image_file_path) - rand_index,
             1
         ):
-
-            # shape:H*W*3が欲しい
-            # ----UCFframe-----
-            # target_numpy = imread(target_file_path_list[i])
-            # target = torch.from_numpy(target_numpy).permute(2, 0, 1)
 
             # shape:H*W欲しい
             # ----image----
@@ -116,7 +96,7 @@ class AlignedDataset(Dataset):
             image = torch.from_numpy(label_numpy).unsqueeze(0)
 
             # shape:H*Wが欲しい
-            # ----インスタンスマップ----
+            # ----labels----
             # まずnumpyにする
             labels_numpy = imread(labels_file_path[i])
             # numpyをテンソルに変換する
