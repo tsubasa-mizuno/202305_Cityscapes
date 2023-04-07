@@ -72,23 +72,13 @@ def get_args():
 
     # dataset_path
     parser.add_argument(
-        '--train_gtFine_folder',
-        default='/mnt/mizuno/dataset/cityscapes/gtFine_trainvaltest/gtFine/train/aachen',
+        '--gtFine_folder',
+        default='/mnt/HDD10TB-1/mizuno/dataset/cityscapes/gtFine_trainvaltest/gtFine/train',
         type=str
     )
     parser.add_argument(
-        '--train_image_folder',
-        default='/mnt/mizuno/dataset/cityscapes/leftImg8bit_trainvaltest/leftImg8bit/train',
-        type=str
-    )
-    parser.add_argument(
-        '--test_gtFine_folder',
-        default='/mnt/mizuno/dataset/cityscapes/gtFine_trainvaltest/gtFine/test',
-        type=str
-    )
-    parser.add_argument(
-        '--test_image_folder',
-        default='/mnt/mizuno/dataset/cityscapes/leftImg8bit_trainvaltest/leftImg8bit/test',
+        '--image_folder',
+        default='/mnt/HDD10TB-1/mizuno/dataset/cityscapes/leftImg8bit_trainvaltest/leftImg8bit/train',
         type=str
     )
 

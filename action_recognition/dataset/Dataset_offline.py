@@ -28,17 +28,16 @@ class AlignedDataset(Dataset):
         # 大元のpathをargsで指定
         # 大元以下は結合
         if purpose == 'train':
-            print(os.path.join(config.train_gtFine_folder, "/*_gtFine_labelIds.png"))
-            self.labels_list = glob.glob(os.path.join(config.train_gtFine_folder, "/*_gtFine_labelIds.png"))
+            self.labels_list = glob.glob(os.path.join(config.tFine_folder, "train/*/*_gtFine_labelIds.png"))
             print(self.labels_list)
-            self.instance_list = glob.glob(config.train_gtFine_folder + '/*/*_gtFine_instanceIds.png')
-            self.image_list = glob.glob(os.path.join(config.train_image_folder, "/*/*_leftImg8bit.png"))
+            self.instance_list = glob.glob(config.gtFine_folder + 'train/*/*_gtFine_instanceIds.png')
+            self.image_list = glob.glob(os.path.join(config.image_folder, "train/*/*_leftImg8bit.png"))
             print(self.labels_list)
         # trainがFalseの時，testのパスを指定
         else:
-            self.labels_list = glob.glob(os.path.join(config.test_gtFine_folder, '/*/*_gtFine_labelIds.png'))
-            self.instance_list = glob.glob(os.path.join(config.test_gtFine_folder, '/*/*_gtFine_instanceIds.png'))
-            self.image_list = glob.glob(os.path.join(config.test_image_folder, '/*/*_leftImg8bit.png'))
+            self.labels_list = glob.glob(os.path.join(config.gtFine_folder, 'test/*/*_gtFine_labelIds.png'))
+            self.instance_list = glob.glob(os.path.join(config.gtFine_folder, 'test/*/*_gtFine_instanceIds.png'))
+            self.image_list = glob.glob(os.path.join(config.image_folder, 'test/*/*_leftImg8bit.png'))
 
         print(self.labels_list)
 
