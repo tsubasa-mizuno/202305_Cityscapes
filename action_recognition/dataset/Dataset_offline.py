@@ -104,9 +104,10 @@ class AlignedDataset(Dataset):
         # shape:H*Wが欲しい
         # ----インスタンスマップ----
         # img->pil
-        pil_instance = Image.open(instance_list[rand_instance])
+        pil_instance = Image.open(instance_list[rand_index])
         # pil->np
         instance_numpy = imread(instance_list[rand_index])
+        instance_numpy = instance_numpy.astype(numpy.float32)
         # np->tensor
         instance_tensor = torch.from_numpy(instance_numpy).unsqueeze(0)
 
