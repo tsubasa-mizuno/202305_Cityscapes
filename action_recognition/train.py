@@ -131,8 +131,8 @@ def main_old():
 
     # spade = get_generator("SPADE", args.gpu, args)
 
-    coco_category_vec = word2vec(args)
-    category_distance = vec_distance(args, coco_category_vec)
+    # coco_category_vec = word2vec(args)
+    # category_distance = vec_distance(args, coco_category_vec)
 
     experiment = cometml.comet()
     train_log_loss = AverageMeter()
@@ -146,7 +146,7 @@ def main_old():
     hyper_params = to_dict(args)
     experiment.log_parameters(hyper_params)
 
-    with tqdm(range(opt.num_epochs)) as pbar_epoch:
+    with tqdm(range(args.num_epochs)) as pbar_epoch:
 
         for epoch in pbar_epoch:
             print("===> Train:Epoch[{}]".format(epoch + 1))
@@ -168,53 +168,53 @@ def main_old():
                 for batch_num, data in pbar_batch:
                     batches_done = epoch * len(dataloader) + batch_num + 1
 
-                    choice_data = noise(opt)
+                    choice_data = noise(args)
 
-                    target = data['target']
+                    image = data['image']
                     transform = transforms.Normalize(
                         (0.5, 0.5, 0.5),
                         (0.5, 0.5, 0.5)
                     )
-                    target = transform(target / 255)
+                    image = transform(image / 255)
 
                     videos_data = []
                     if choice_data == 'real':
-                        videos = target.permute(0, 2, 1, 3, 4).to(device)
+                        videos = image.permute(0, 2, 1, 3, 4).to(device)
                     else:
                         with torch.no_grad():
-                            if opt.online_mode:
+                            if args.online_mode:
                                 label_data = []
                                 instance_data = []
-                                for i in range(len(data['target'])):
+                                for i in range(len(data['image'])):
                                     label, instance = segmentation(
-                                        opt,
-                                        data['target'][i],
+                                        args,
+                                        data['image'][i],
                                         seg_model
                                     )
                                     label_data.append(label)
                                     instance_data.append(instance)
-                                data['source'] = torch.stack(label_data, dim=0)
+                                data['labels'] = torch.stack(label_data, dim=0)
                                 data['instance'] = torch.stack(instance_data, dim=0)
 
-                            for i in range(len(data['source'])):
-                                video, source, not_paste = label2image(
+                            for i in range(len(data['labels'])):
+                                video, labels, not_paste = label2image(
                                     # spade.model,
                                     # ここでtorch.Size([16, 16, 3, 224, 224])の5次元テンソルが生成
-                                    convert_label(data['source'][i].clone()),
+                                    convert_label(data['labels'][i].clone()),
                                     data['instance'][i],
-                                    target[i],
-                                    opt,
-                                    category_distance
+                                    image[i],
+                                    args,
+                                    # category_distance
                                 )
 
-                                keep_videos(video.cpu(), 'gen', opt, i,)
-                                keep_videos(target[i].cpu(), 'target', opt, i)
+                                keep_videos(video.cpu(), 'gen', args, i,)
+                                keep_videos(image[i].cpu(), 'image', args, i)
                                 keep_videos(
-                                    (convert_label(data['source'][i].clone()) - 1).cpu(),
-                                    'source_not_shuffle', opt, i, norm=False)
-                                keep_videos(source.cpu(), 'source', opt, i, norm=False)
-                                keep_videos((source / 255).cpu(), 'grey', opt, i, norm=False)
-                                keep_videos(not_paste.cpu(), 'not_paste', opt, i)
+                                    (convert_label(data['labels'][i].clone()) - 1).cpu(),
+                                    'labels_not_shuffle', args, i, norm=False)
+                                keep_videos(labels.cpu(), 'labels', args, i, norm=False)
+                                keep_videos((labels / 255).cpu(), 'grey', args, i, norm=False)
+                                keep_videos(not_paste.cpu(), 'not_paste', args, i)
 
                                 videos_data.append(video.to(device))
 
@@ -230,7 +230,7 @@ def main_old():
                         train_log_loss,
                         train_log_top1,
                         train_log_top5,
-                        opt.train_num_batchs
+                        args.train_num_batchs
                     )
 
             experiment.log_metric(

@@ -119,7 +119,7 @@ class AlignedDataset(Dataset):
 
         # リサイズされた画像の縦と横の長さをリスト化する
         # image.size()[1]：縦の長さ，image.size()[2]：横の長さ
-        h, w = self.short_side(image.size()[1], image.size()[2], 256)
+        h, w = self.short_side(image_tensor.size()[1], image_tensor.size()[2], 256)
         transform_list = [
             transforms.Resize([h, w], Image.NEAREST),
             transforms.RandomCrop(self.config.crop_size)
