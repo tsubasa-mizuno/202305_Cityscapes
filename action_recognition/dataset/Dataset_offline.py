@@ -85,23 +85,30 @@ class AlignedDataset(Dataset):
 
         # shape:H*W*3が欲しい
         # ----実画像-----
-        print(image_list[rand_index])
+        # img->pil
         pil_image = Image.open(image_list[rand_index])
-        image_numpy = np.array(pil_image)
+        # pil->np
+        image_numpy = numpy.array(pil_image)
+        # np->tensor
         image_tensor = torch.from_numpy(image_numpy).permute(2, 0, 1)
 
         # shape:H*W欲しい
         # ----ラベル画像----
-        labels_numpy = imread(labels_list[rand_index])
-        # [3*1024*2048]
-        labels_tensor = torch.from_numpy(labels_numpy.astype(numpy.float32)).unsqueeze(0)
+        # img->pil
+        pil_labels = Image.open(labels_list[rand_index])
+        # pil->np
+        labels_numpy = numpy.array(pil_labels)
+        # np->tensor
+        labels_tensor = torch.from_numpy(labels_numpy).unsqueeze(0)
 
         # shape:H*Wが欲しい
         # ----インスタンスマップ----
-        # まずnumpyにする
+        # img->pil
+        pil_instance = Image.open(instance_list[rand_instance])
+        # pil->np
         instance_numpy = imread(instance_list[rand_index])
-        # numpyをテンソルに変換する
-        instance_tensor = torch.from_numpy(instance_numpy.astype(numpy.float32)).unsqueeze(0)
+        # np->tensor
+        instance_tensor = torch.from_numpy(instance_numpy).unsqueeze(0)
 
         # .append：リストに要素を追加する
         sampling_labels.append(labels_tensor)
