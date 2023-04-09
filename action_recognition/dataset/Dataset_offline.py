@@ -95,7 +95,7 @@ class AlignedDataset(Dataset):
         # shape:H*W欲しい
         # ----ラベル画像----
         # img->pil
-        pil_labels = Image.open(instance_file_path)
+        pil_labels = Image.open(labels_file_path)
         # pil->np
         labels_numpy = numpy.array(pil_labels)
         # np->tensor
