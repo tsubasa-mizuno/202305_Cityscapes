@@ -146,7 +146,7 @@ def main_old():
     hyper_params = to_dict(args)
     experiment.log_parameters(hyper_params)
 
-    with tqdm(range(args.num_epochs)) as pbar_epoch:
+    with tqdm(range(opt.num_epochs)) as pbar_epoch:
 
         for epoch in pbar_epoch:
             print("===> Train:Epoch[{}]".format(epoch + 1))
@@ -166,70 +166,55 @@ def main_old():
                 val_log_top5.reset()
 
                 for batch_num, data in pbar_batch:
-        ('imread', fname, plugin=plugin, **plugin_args)
-        File "/opt/conda/lib/python3.8/site-packages/skimage/io/manage_plugins.py", line 207, in call_plugin
-          return func(*args, **kwargs)
-        File "/opt/conda/lib/python3.8/site-packages/skimage/io/_plugins/imageio_plugin.py", line 15, in imread
-          return np.asarray(imageio_imread(*args, **kwargs))
-        File "/opt/conda/lib/python3.8/site-packages/imageio/v2.py", line 200, in imread
-          with imopen(uri, "ri", **imopen_args) as file:
-        File "/opt/conda/lib/python3.8/site-packages/imageio/core/imopen.py", line 118, in imopen
-          request = Request(uri, io_mode, format_hint=format_hint, extension=extension)
-        File "/opt/conda/lib/python3.8/site-packages/imageio/core/request.py", line 248, in __init__
-          self._parse_uri(uri)
-        File "/opt/conda/lib/python3.8/site-packages/imageio/core/request.py", line 369, in _parse_uri
-          raise IOError("Cannot understand given URI: %s." % uri_r)
-      OSError: Cannot understand given URI: <PIL.PngImagePlugin.PngImageFile image mode=I size=2048x1....
-
                     batches_done = epoch * len(dataloader) + batch_num + 1
 
-                    choice_data = noise(args)
+                    choice_data = noise(opt)
 
-                    image = data['image']
+                    target = data['target']
                     transform = transforms.Normalize(
                         (0.5, 0.5, 0.5),
                         (0.5, 0.5, 0.5)
                     )
-                    image = transform(image / 255)
+                    target = transform(target / 255)
 
                     videos_data = []
                     if choice_data == 'real':
-                        videos = image.permute(0, 2, 1, 3, 4).to(device)
+                        videos = target.permute(0, 2, 1, 3, 4).to(device)
                     else:
                         with torch.no_grad():
-                            if args.online_mode:
+                            if opt.online_mode:
                                 label_data = []
                                 instance_data = []
-                                for i in range(len(data['image'])):
+                                for i in range(len(data['target'])):
                                     label, instance = segmentation(
-                                        args,
-                                        data['image'][i],
+                                        opt,
+                                        data['target'][i],
                                         seg_model
                                     )
                                     label_data.append(label)
                                     instance_data.append(instance)
-                                data['label'] = torch.stack(label_data, dim=0)
+                                data['source'] = torch.stack(label_data, dim=0)
                                 data['instance'] = torch.stack(instance_data, dim=0)
 
-                            for i in range(len(data['label'])):
-                                video, label, not_paste = label2image(
+                            for i in range(len(data['source'])):
+                                video, source, not_paste = label2image(
                                     # spade.model,
                                     # ここでtorch.Size([16, 16, 3, 224, 224])の5次元テンソルが生成
-                                    convert_label(data['label'][i].clone()),
+                                    convert_label(data['source'][i].clone()),
                                     data['instance'][i],
-                                    image[i],
-                                    args,
+                                    target[i],
+                                    opt,
                                     category_distance
                                 )
 
-                                keep_videos(video.cpu(), 'gen', args, i,)
-                                keep_videos(image[i].cpu(), 'image', args, i)
+                                keep_videos(video.cpu(), 'gen', opt, i,)
+                                keep_videos(target[i].cpu(), 'target', opt, i)
                                 keep_videos(
-                                    (convert_label(data['label'][i].clone()) - 1).cpu(),
-                                    'label_not_shuffle', args, i, norm=False)
-                                keep_videos(label.cpu(), 'label', args, i, norm=False)
-                                keep_videos((label / 255).cpu(), 'grey', args, i, norm=False)
-                                keep_videos(not_paste.cpu(), 'not_paste', args, i)
+                                    (convert_label(data['source'][i].clone()) - 1).cpu(),
+                                    'source_not_shuffle', opt, i, norm=False)
+                                keep_videos(source.cpu(), 'source', opt, i, norm=False)
+                                keep_videos((source / 255).cpu(), 'grey', opt, i, norm=False)
+                                keep_videos(not_paste.cpu(), 'not_paste', opt, i)
 
                                 videos_data.append(video.to(device))
 
@@ -245,7 +230,7 @@ def main_old():
                         train_log_loss,
                         train_log_top1,
                         train_log_top5,
-                        args.train_num_batchs
+                        opt.train_num_batchs
                     )
 
             experiment.log_metric(
