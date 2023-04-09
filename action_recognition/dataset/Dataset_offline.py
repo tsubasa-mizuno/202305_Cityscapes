@@ -85,6 +85,7 @@ class AlignedDataset(Dataset):
 
         # shape:H*W*3が欲しい
         # ----実画像-----
+        print(image_list[rand_index])
         image_numpy = imread(image_list[rand_index])
         image_tensor = torch.from_numpy(image_numpy).permute(2, 0, 1)
 
