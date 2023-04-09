@@ -166,6 +166,21 @@ def main_old():
                 val_log_top5.reset()
 
                 for batch_num, data in pbar_batch:
+        ('imread', fname, plugin=plugin, **plugin_args)
+        File "/opt/conda/lib/python3.8/site-packages/skimage/io/manage_plugins.py", line 207, in call_plugin
+          return func(*args, **kwargs)
+        File "/opt/conda/lib/python3.8/site-packages/skimage/io/_plugins/imageio_plugin.py", line 15, in imread
+          return np.asarray(imageio_imread(*args, **kwargs))
+        File "/opt/conda/lib/python3.8/site-packages/imageio/v2.py", line 200, in imread
+          with imopen(uri, "ri", **imopen_args) as file:
+        File "/opt/conda/lib/python3.8/site-packages/imageio/core/imopen.py", line 118, in imopen
+          request = Request(uri, io_mode, format_hint=format_hint, extension=extension)
+        File "/opt/conda/lib/python3.8/site-packages/imageio/core/request.py", line 248, in __init__
+          self._parse_uri(uri)
+        File "/opt/conda/lib/python3.8/site-packages/imageio/core/request.py", line 369, in _parse_uri
+          raise IOError("Cannot understand given URI: %s." % uri_r)
+      OSError: Cannot understand given URI: <PIL.PngImagePlugin.PngImageFile image mode=I size=2048x1....
+
                     batches_done = epoch * len(dataloader) + batch_num + 1
 
                     choice_data = noise(args)

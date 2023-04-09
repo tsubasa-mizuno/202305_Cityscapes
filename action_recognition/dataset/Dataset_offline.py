@@ -86,7 +86,7 @@ class AlignedDataset(Dataset):
         # shape:H*W*3が欲しい
         # ----実画像-----
         # img->pil
-        pil_image = Image.open(image_list[rand_index])
+        pil_image = Image.open(image_file_path)
         # pil->np
         image_numpy = numpy.array(pil_image)
         # np->tensor
@@ -95,7 +95,7 @@ class AlignedDataset(Dataset):
         # shape:H*W欲しい
         # ----ラベル画像----
         # img->pil
-        pil_labels = Image.open(labels_list[rand_index])
+        pil_labels = Image.open(instance_file_path)
         # pil->np
         labels_numpy = numpy.array(pil_labels)
         # np->tensor
@@ -104,10 +104,9 @@ class AlignedDataset(Dataset):
         # shape:H*Wが欲しい
         # ----インスタンスマップ----
         # img->pil
-        pil_instance = Image.open(instance_list[rand_index])
+        pil_instance = Image.open(instance_file_path)
         # pil->np
-        instance_numpy = imread(instance_list[rand_index])
-        instance_numpy = instance_numpy.astype(numpy.float32)
+        instance_numpy = numpy.array(pil_instance)
         # np->tensor
         instance_tensor = torch.from_numpy(instance_numpy).unsqueeze(0)
 
