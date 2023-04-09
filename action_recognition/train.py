@@ -131,8 +131,8 @@ def main_old():
 
     # spade = get_generator("SPADE", args.gpu, args)
 
-    # coco_category_vec = word2vec(args)
-    # category_distance = vec_distance(args, coco_category_vec)
+    coco_category_vec = word2vec(args)
+    category_distance = vec_distance(args, coco_category_vec)
 
     experiment = cometml.comet()
     train_log_loss = AverageMeter()
@@ -204,7 +204,7 @@ def main_old():
                                     data['instance'][i],
                                     image[i],
                                     args,
-                                    # category_distance
+                                    category_distance
                                 )
 
                                 keep_videos(video.cpu(), 'gen', args, i,)

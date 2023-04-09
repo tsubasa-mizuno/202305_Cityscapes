@@ -142,10 +142,13 @@ class AlignedDataset(Dataset):
         # labels_tensor = transform(labels)
 
 
-        # # instance_tensor.size():16*1*224*224
+        # instance_tensor.size():16*1*224*224
         # instance_tensor = torch.stack(instance, dim=0)
         # torch.manual_seed(seed)
         # instance_tensor = transform(instance_tensor)
+        print("labels = " + str(labels_tensor))
+        print("instance = " + str(instance_tensor))
+        print("image = " + str(image_tensor))
 
         return {
             'labels': labels_tensor,
