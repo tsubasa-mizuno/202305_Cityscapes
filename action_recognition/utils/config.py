@@ -9,12 +9,6 @@ def get_args():
         default='Cityscapes',
         choices=['Cityscapes', 'UCF', 'HMDB', 'Kinetics']
     )
-    # parser.add_argument(
-    #     '-l',
-    #     '--labels',
-    #     type=str,
-    #     help='input image to generator'
-    # )
     parser.add_argument(
         '-l',
         '--labels',
