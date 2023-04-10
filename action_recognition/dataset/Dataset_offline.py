@@ -21,29 +21,29 @@ class AlignedDataset(Dataset):
         # labelsファイルのパスのリスト
         self.labels_list = []
         # instanceファイルのパスのリスト
-        self.instance_list = []
+        # self.instance_list = []
         # imageファイルのパスのリスト
         self.image_list = []
 
         # purpose == trainの時，trainのパスを指定
         if purpose == 'train':
             self.labels_list = glob.glob(os.path.join(config.gtFine_folder, "train/*/*_gtFine_labelIds.png"))
-            self.instance_list = glob.glob(config.gtFine_folder + 'train/*/*_gtFine_instanceIds.png')
+            # self.instance_list = glob.glob(config.gtFine_folder + 'train/*/*_gtFine_instanceIds.png')
             self.image_list = glob.glob(os.path.join(config.image_folder, "train/*/*_leftImg8bit.png"))
         # purpose == valの時，valのパスを指定
         if purpose == 'val':
             self.labels_list = glob.glob(os.path.join(config.gtFine_folder, "val/*/*_gtFine_labelIds.png"))
-            self.instance_list = glob.glob(config.gtFine_folder + 'val/*/*_gtFine_instanceIds.png')
+            # self.instance_list = glob.glob(config.gtFine_folder + 'val/*/*_gtFine_instanceIds.png')
             self.image_list = glob.glob(os.path.join(config.image_folder, "val/*/*_leftImg8bit.png"))
         # purpose == testの時，testのパスを指定
         else:
             self.labels_list = glob.glob(os.path.join(config.gtFine_folder, 'test/*/*_gtFine_labelIds.png'))
-            self.instance_list = glob.glob(os.path.join(config.gtFine_folder, 'test/*/*_gtFine_instanceIds.png'))
+            # self.instance_list = glob.glob(os.path.join(config.gtFine_folder, 'test/*/*_gtFine_instanceIds.png'))
             self.image_list = glob.glob(os.path.join(config.image_folder, 'test/*/*_leftImg8bit.png'))
 
         # ソートする
         self.labels_list.sort()
-        self.instance_list.sort()
+        # self.instance_list.sort()
         self.image_list.sort()
         # これでlabels，instance，imageのそれぞれの画像までのパス一覧が順番に並んだリストができた
 
@@ -58,22 +58,12 @@ class AlignedDataset(Dataset):
             new_w = int(math.floor((float(w) / h) * size))
         return new_w, new_h
 
-    def make_dataset(self, index, labels_list, instance_list, image_list) -> dict:
+    def make_dataset(self, index, labels_list, image_list) -> dict:
         # ランダムなindexの画像を取得
         print(index)
         labels_file_path = labels_list[index]
-        instance_file_path = instance_list[index]
+        # instance_file_path = instance_list[index]
         image_file_path = image_list[index]
-
-        # 開始場所をランダムで指定する
-        rand_index = random.randint(
-            0, len(image_file_path)
-        )
-
-        sampling_labels = []
-        sampling_instance = []
-        sampling_image = []
-        path_list = []
 
         seed = random.randint(0, 2**32)
         # for in range(開始値，最大値，間隔)
@@ -91,6 +81,7 @@ class AlignedDataset(Dataset):
         image_numpy = numpy.array(pil_image)
         # np->tensor
         image_tensor = torch.from_numpy(image_numpy).permute(2, 0, 1)
+        # shape：[3, 1024, 2048]
 
         # shape:H*W欲しい
         # ----ラベル画像----
@@ -101,21 +92,14 @@ class AlignedDataset(Dataset):
         # np->tensor
         labels_tensor = torch.from_numpy(labels_numpy).unsqueeze(0)
 
-        # shape:H*Wが欲しい
-        # ----インスタンスマップ----
-        # img->pil
-        pil_instance = Image.open(instance_file_path)
-        # pil->np
-        instance_numpy = numpy.array(pil_instance)
-        # np->tensor
-        instance_tensor = torch.from_numpy(instance_numpy).unsqueeze(0)
-
-        # .append：リストに要素を追加する
-        sampling_labels.append(labels_tensor)
-        sampling_instance.append(instance_tensor)
-        sampling_image.append(image_tensor)
-
-        path_list.append(str(Path(labels_list[rand_index]).parent.parent.name))
+        # # shape:H*Wが欲しい
+        # # ----インスタンスマップ----
+        # # img->pil
+        # pil_instance = Image.open(instance_file_path)
+        # # pil->np
+        # instance_numpy = numpy.array(pil_instance)
+        # # np->tensor
+        # instance_tensor = torch.from_numpy(instance_numpy).unsqueeze(0)
 
         # リサイズされた画像の縦と横の長さをリスト化する
         # image.size()[1]：縦の長さ，image.size()[2]：横の長さ
@@ -125,34 +109,24 @@ class AlignedDataset(Dataset):
             transforms.RandomCrop(self.config.crop_size)
         ]
 
-        # # transform.Compose：複数のTransformを連続して行うTransform
-        # transform = transforms.Compose(transform_list)
+        # transform.Compose：複数のTransformを連続して行うTransform
+        transform = transforms.Compose(transform_list)
 
-        # # ここでは16*□*224*224になっているが，3*224*224に変換する
-        # # image_tensor.size():16*3*224*224
-        # # torch.stack：新しいdimを作成し，そそのdimに沿ってテンソルを連結
-        # image_tensor = torch.stack(image, dim=0)
-        # torch.manual_seed(seed)
-        # image_tensor = transform(image_tensor.float())
-        # # [80*3*224*224] 2023/04/07/17:40
+        torch.manual_seed(seed)
+        image_tensor = transform(image_tensor.float())
 
-        # # labels_tensor.size():16*1*224*224
-        # labels_tensor = torch.stack(labels, dim=0)
-        # torch.manual_seed(seed)
-        # labels_tensor = transform(labels)
+        torch.manual_seed(seed)
+        labels_tensor = transform(labels_tensor.float())
 
 
         # instance_tensor.size():16*1*224*224
         # instance_tensor = torch.stack(instance, dim=0)
         # torch.manual_seed(seed)
         # instance_tensor = transform(instance_tensor)
-        print("labels = " + str(labels_tensor))
-        print("instance = " + str(instance_tensor))
-        print("image = " + str(image_tensor))
 
         return {
             'labels': labels_tensor,
-            'instance': instance_tensor,
+            # 'instance': instance_tensor,
             'image': image_tensor
         }
 
@@ -161,7 +135,7 @@ class AlignedDataset(Dataset):
         data = self.make_dataset(
             index,
             self.labels_list,
-            self.instance_list,
+            # self.instance_list,
             self.image_list
         )
 
