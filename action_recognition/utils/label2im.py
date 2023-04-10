@@ -3,7 +3,7 @@ import torch
 import numpy as np
 from numpy.random import default_rng
 from person_paste import person_paste
-from detectron2.data import MetadataCatalog
+# from detectron2.data import MetadataCatalog
 from category_sampling import (
     semantic_sampling,
     random_sampling
